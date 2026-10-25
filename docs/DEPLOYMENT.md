@@ -31,3 +31,13 @@ Vo Vercel Deployments zvoľ predchádzajúci overený deployment a Promote to Pr
 `CORS_ORIGINS=https://tvoja-domena.example PROJECTS_DIR="$HOME/Projects" npm run server`
 
 Origin musí presne zodpovedať doméne aplikácie. Browser môže žiadať súhlas s prístupom k lokálnej sieti. `localhost` na iPhone označuje iPhone, nie MacBook; skener na inom zariadení sa takto nedá používať. Skener nevystavuj na verejné rozhranie.
+
+## Release smoke testy proti hostingu
+
+```bash
+BASE_URL=https://<skutocna-domena> TEST_WEBKIT=1 npm run test:release
+```
+
+Táto sada vyžaduje reálnu adresu a nespúšťa preview ani skener. Kontroluje hlavičky, routing, asset cache, manifest a offline browser reload. `BASE_URL=... npm run test:e2e` spustí pôvodné interakčné scenáre proti zvolenému hostingu (GitHub/Vercel stále mockované) a lokálny fixture skener s príslušným CORS originom.
+
+Aktuálny blokér nasadenia a ďalšie kroky sú v [RELEASE-STATUS.md](RELEASE-STATUS.md).
