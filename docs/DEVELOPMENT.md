@@ -41,7 +41,7 @@ Voliteľne `SOURCEMAP=true npm run build` vygeneruje skryté source mapy (napr. 
 
 - Pomenované exporty, `import type` pre typy (vynútené ESLintom), žiadne `any`.
 - Odkazy z externých dát vždy cez `safeExternalUrl`.
-- `localStorage` iba cez `lib/storage.ts`.
+- Nové trvalé dáta cez `offline/db.ts`; priamy localStorage prístup je vyhradený validovanej migrácii a fallback signálu koordinácie.
 - Nové farby len cez CSS premenné v `index.css` / `tailwind.config.js`.
 
 ## Úprava úvodnej obrazovky
@@ -55,3 +55,5 @@ Voliteľne `SOURCEMAP=true npm run build` vygeneruje skryté source mapy (napr. 
 Po `npm run build` nainštaluj browser binárky cez `npx playwright install chromium webkit` a spusti `TEST_WEBKIT=1 npm run test:e2e`. Testy samy spustia preview na 4173 a lokálny skener na 3001 s deterministickým fixture adresárom; tieto porty musia byť voľné. GitHub/Vercel odpovede sú kontrolované mocky, lokálny import používa skutočný HTTP skener. CI pridáva WebKit/iPhone emuláciu. Skutočné Safari/iOS zariadenie sa tým nenahrádza.
 
 `src/lib/api.test.ts` overuje API chyby, stránkovanie, schému, identitu a corrupt storage; `server/local-scanner.test.mjs` overuje HTTP/CORS/Host, read-only metódy, discovery a odstránenie remote credentials. `npm run check` tiež kontroluje audit závislostí.
+
+Offline testy: `src/offline/db.test.ts` používa fake-indexeddb na migráciu, transakcie, logické revízie a fencing/retry; `compression.test.ts` používa natívne Node streams a meria bajty. `e2e/offline.spec.ts` overuje skutočné browser IndexedDB, viac kariet, offline štart a worker execution. Test worker message nepredstiera prirodzené doručenie native Background Sync.

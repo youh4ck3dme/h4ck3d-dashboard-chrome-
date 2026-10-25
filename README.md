@@ -38,10 +38,11 @@ npm run preview
 - **Vercel:** Zdroje → Vercel token, prípadne Team ID. Import používa priamy browser prístup k API; oprávnenia a CORS závisia od služby.
 - **Lokálne:** v druhom termináli `PROJECTS_DIR="$HOME/Projects" npm run server`. Skener počúva iba na `127.0.0.1:3001`. Zdroje → Lokálne projekty → Prehľadať. [Podrobný návod](docs/LOCAL-SCANNER.md).
 
-Tokeny sú iba v pamäti. Importované metadáta a označenie Roadmap sú v lokálnom úložisku konkrétneho prehliadača. Toto je osobný nástroj bez zdieľania dát medzi používateľmi a bez prihlásenia; nikdy do verejného buildu nepridávaj súkromné importy alebo tajomstvá.
+Tokeny sú iba v pamäti. Importované metadáta a označenie Roadmap sú v IndexedDB konkrétneho prehliadača. Staré localStorage dáta sa bezstratovo migrujú. Toto je osobný nástroj bez zdieľania dát medzi používateľmi a bez prihlásenia; nikdy do verejného buildu nepridávaj súkromné importy alebo tajomstvá.
 
 ## Dokumentácia
 
+- [Offline dáta, migrácia a sync limity](docs/OFFLINE-SYNC.md)
 - [Architektúra](docs/ARCHITECTURE.md)
 - [Bezpečnosť a obmedzenia](docs/SECURITY.md)
 - [Lokálny skener](docs/LOCAL-SCANNER.md)

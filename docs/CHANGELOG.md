@@ -1,5 +1,13 @@
 # Changelog
 
+## Offline-first vrstva — 2026-10-25
+
+- IndexedDB v1, idempotentná migrácia legacy importov a Roadmap, ochrana pred chybou kvóty.
+- Optimistic overrides, logické LWW revízie, stabilné identity a koordinácia kariet.
+- Read-only refreshy, pamäťové credentials, trvalá local queue, backoff/Retry-After, generation a lease fencing.
+- Vlastný injectManifest worker zachováva offline shell a prompt aktualizácie.
+- Lokálna gzip/JSON záloha, explicitný stav uloženia a dokumentované limity cross-device/background sync.
+
 ## Produkčné spevnenie — 2026-10-25
 
 - Import do `youh4ck3dme/h4ck3d-dashboard-timeline`; aktualizované návody a AGENTS.md.

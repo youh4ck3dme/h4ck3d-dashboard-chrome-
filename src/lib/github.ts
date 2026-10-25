@@ -25,6 +25,8 @@ export interface GitHubRepo {
 }
 
 export interface GitHubFetchResult {
+  status?: number;
+  retryAfter?: string;
   repos: GitHubRepo[];
   error: string | null;
   rateLimitRemaining: number | null;
@@ -66,6 +68,8 @@ export async function fetchAllRepos(token: string, signal?: AbortSignal): Promis
             repos: [],
             error: 'Neplatný token. Skontroluj, či je token správny a má scope "repo".',
             rateLimitRemaining,
+            status: response.status,
+            retryAfter: response.headers.get('retry-after') ?? undefined,
           };
         }
         if (response.status === 403 || response.status === 429) {
@@ -76,18 +80,22 @@ export async function fetchAllRepos(token: string, signal?: AbortSignal): Promis
                 ? 'Dosiahol si GitHub rate limit. Skús to znova o niekoľko minút.'
                 : 'Prístup zamietnutý. Token nemá potrebné oprávnenia.',
             rateLimitRemaining,
+            status: response.status,
+            retryAfter: response.headers.get('retry-after') ?? undefined,
           };
         }
         return {
           repos: [],
           error: `GitHub API chyba: ${response.status} ${response.statusText}`,
           rateLimitRemaining,
+          status: response.status,
+          retryAfter: response.headers.get('retry-after') ?? undefined,
         };
       }
 
       const data: unknown = await response.json();
       if (!Array.isArray(data) || !data.every(isGitHubRepo)) {
-        return { repos: [], error: 'GitHub API vrátilo neplatné dáta.', rateLimitRemaining };
+        return { repos: [], error: 'GitHub API vrátilo neplatné dáta.', rateLimitRemaining, status: 422 };
       }
       if (data.length === 0) break;
       allRepos.push(...data);

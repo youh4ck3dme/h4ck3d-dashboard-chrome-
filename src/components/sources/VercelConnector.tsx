@@ -4,11 +4,13 @@ import { Button } from '../ui/Button';
 import { TextField } from '../ui/TextField';
 import { SourceCard, SourceConnected, SourceError } from './SourceCard';
 import { type VercelProject, fetchVercelProjects } from '../../lib/sources';
+import { registerRefresh, SyncFailure, retryAfterMs } from '../../offline/engine';
+import { vercelToProject } from '../../lib/sources';
 import { useSourceRequest } from '../../hooks/useSourceRequest';
 
 interface VercelConnectorProps {
   count: number;
-  onLoaded: (items: VercelProject[]) => void;
+  onLoaded: (items: VercelProject[]) => void | Promise<boolean>;
   onDisconnect: () => void;
 }
 
@@ -17,6 +19,7 @@ export function VercelConnector({ count, onLoaded, onDisconnect }: VercelConnect
   const [teamId, setTeamId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
   const [connected, setConnected] = useState(false);
   const request = useSourceRequest();
 
@@ -24,6 +27,8 @@ export function VercelConnector({ count, onLoaded, onDisconnect }: VercelConnect
     if (!token.trim() || loading) return;
     setLoading(true);
     setError(null);
+    const credential = token.trim();
+    const team = teamId.trim() || undefined;
     const signal = request.begin();
     const result = await fetchVercelProjects(token.trim(), teamId.trim() || undefined, signal);
     if (signal.aborted) return;
@@ -33,7 +38,14 @@ export function VercelConnector({ count, onLoaded, onDisconnect }: VercelConnect
       setError(result.error);
       return;
     }
-    onLoaded(result.items);
+    registerRefresh('Vercel', async (signal) => {
+      const refresh = await fetchVercelProjects(credential, team, signal);
+      if (refresh.error)
+        throw new SyncFailure(refresh.error, refresh.status, retryAfterMs(refresh.retryAfter ?? null));
+      return refresh.items.map(vercelToProject);
+    });
+    setEditing(false);
+    if ((await onLoaded(result.items)) === false) return;
     setToken(''); // don't keep the token around once projects are loaded
     setConnected(true);
   };
@@ -53,8 +65,16 @@ export function VercelConnector({ count, onLoaded, onDisconnect }: VercelConnect
       description="Projekty, produkčné URL a stav posledného nasadenia. Párujú sa s GitHub repozitárom."
       count={count}
     >
-      {connected || count > 0 ? (
-        <SourceConnected text={`${count} projektov načítaných`} onDisconnect={disconnect} />
+      {(connected || count > 0) && !editing ? (
+        <SourceConnected
+          text={`${count} projektov načítaných`}
+          onDisconnect={disconnect}
+          action={
+            <Button variant="outline" onClick={() => setEditing(true)}>
+              Pripojiť znova
+            </Button>
+          }
+        />
       ) : (
         <form
           className="flex flex-col gap-3"

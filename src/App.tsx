@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StorageProblem } from './components/StorageProblem';
+import { OfflineStatus } from './components/OfflineStatus';
 import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { MobileFilters } from './components/MobileFilters';
@@ -75,6 +77,7 @@ export function App() {
   return (
     <>
       {welcome.show && <WelcomeScreen phase={welcome.phase} />}
+      <StorageProblem />
       <div
         ref={appRef}
         className="flex h-[100dvh] w-full flex-col overflow-hidden bg-app font-sans text-primary"
@@ -119,6 +122,7 @@ export function App() {
                   </header>
 
                   <StatsRow projects={projects} />
+                  <OfflineStatus />
 
                   <p className="mb-6 text-xs leading-relaxed text-muted" role="status">
                     {connectedCount === 0

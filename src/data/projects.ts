@@ -26,6 +26,7 @@ export interface Project {
   vercelUrl?: string;
   vercelState?: string;
   localPath?: string;
+  identityAliases?: string[];
 }
 
 export type ProjectSource = 'Static' | 'GitHub' | 'Vercel' | 'Local';

@@ -23,6 +23,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       injectRegister: false,
       includeAssets: ['favicon.svg', 'favicon-48x48.png', 'apple-touch-icon.png'],
       manifest: {
@@ -45,32 +48,10 @@ export default defineConfig({
           { src: 'maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // Precache only Latin font subsets (Slovak/English); other scripts load on demand.
         globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2', 'splash/**'],
-        navigateFallback: '/index.html',
-        cleanupOutdatedCaches: true,
-        // API calls (GitHub, Vercel, local scanner) must never be served from cache.
-        runtimeCaching: [
-          {
-            // Splash image: fetched only on phones/tablets, then cached for offline starts.
-            urlPattern: ({ sameOrigin, url }) => sameOrigin && url.pathname.startsWith('/splash/'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'splash',
-              expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 * 365 },
-            },
-          },
-          {
-            urlPattern: ({ sameOrigin, url }) => sameOrigin && url.pathname.endsWith('.woff2'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fonts',
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
-            },
-          },
-        ],
+        injectionPoint: 'self.__WB_MANIFEST',
       },
       devOptions: { enabled: false },
     }),

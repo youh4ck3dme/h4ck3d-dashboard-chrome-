@@ -9,8 +9,8 @@ import { type ExternalSource, type SourceCounts } from '../../hooks/useProjectSo
 interface SourcesViewProps {
   counts: SourceCounts;
   onOpenGitHub: () => void;
-  onVercelLoaded: (items: VercelProject[]) => void;
-  onLocalLoaded: (items: LocalProject[]) => void;
+  onVercelLoaded: (items: VercelProject[]) => void | Promise<boolean>;
+  onLocalLoaded: (items: LocalProject[], endpoint?: string) => void | Promise<boolean>;
   onClear: (source: ExternalSource) => void;
 }
 

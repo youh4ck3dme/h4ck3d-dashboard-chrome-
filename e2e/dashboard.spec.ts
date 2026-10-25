@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { records } from './storage';
 import AxeBuilder from '@axe-core/playwright';
 
 const demoRepo = {
@@ -79,10 +80,13 @@ test('GitHub import survives reload, clears token and disconnect restores demo',
   if (await timeline.isVisible()) await timeline.click();
   await expect(page.getByRole('button', { name: 'Open real-import', exact: true })).toBeVisible();
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain('fake-e2e-token');
+  for (const store of ['sourceSnapshots', 'projectOverrides', 'outbox', 'syncMeta'])
+    expect(JSON.stringify(await records(page, store))).not.toContain('fake-e2e-token');
   await page.reload();
   await expect(page.getByRole('button', { name: 'Open real-import', exact: true })).toBeVisible();
   await sources(page);
   await page.getByRole('button', { name: /Odpojiť/ }).click();
+  await expect(page.getByRole('button', { name: 'Pripojiť GitHub', exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByText('Ukážkové údaje', { exact: false })).toBeVisible();
 });
@@ -107,7 +111,7 @@ test('malformed stored projects recover to a usable timeline', async ({ page }) 
   );
   await ready(page);
   await expect(page.getByRole('button', { name: /^Open / }).first()).toBeVisible();
-  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.getByRole('alert')).toContainText('poškodené');
 });
 
 test('production CSP, manifest and service worker support offline reload', async ({ page, context }) => {
