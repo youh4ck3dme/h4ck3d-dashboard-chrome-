@@ -1,0 +1,198 @@
+import { useState } from 'react';
+import { Check, ExternalLink, Github, HardDrive, Plus, Triangle, X } from 'lucide-react';
+import type { Project } from '../data/projects';
+import { displayHost, safeExternalUrl } from '../lib/url';
+import { formatDate } from '../lib/date';
+import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
+import { buttonClassName } from './ui/buttonStyles';
+import { MaturityBar } from './ui/MaturityBar';
+import { RiskBar } from './ui/RiskBar';
+import { readJSON, writeJSON } from '../lib/storage';
+
+interface ProjectDetailProps {
+  project: Project;
+  onClose?: () => void;
+}
+
+export function ProjectDetail({ project, onClose }: ProjectDetailProps) {
+  const [onRoadmap, setOnRoadmap] = useState(() =>
+    readJSON(`roadmap:${project.id}`, false, (v): v is boolean => typeof v === 'boolean'),
+  );
+  const dateStr = formatDate(project.date, 'long');
+  const githubUrl = safeExternalUrl(project.githubUrl);
+  const vercelUrl = safeExternalUrl(project.vercelUrl);
+  const caseStudyUrl = safeExternalUrl(project.caseStudyUrl);
+
+  const meta = [
+    { label: 'Category', value: project.category },
+    { label: 'Status', value: project.status },
+    { label: 'Visibility', value: project.visibility },
+    { label: 'Date', value: dateStr },
+  ];
+
+  const links = [
+    { icon: Github, label: 'GitHub', value: project.repoFullName },
+    {
+      icon: Triangle,
+      label: 'Vercel',
+      value: vercelUrl
+        ? `${displayHost(vercelUrl)}${project.vercelState ? ` · ${project.vercelState}` : ''}`
+        : undefined,
+    },
+    { icon: HardDrive, label: 'Local', value: project.localPath },
+  ];
+
+  return (
+    <div className="flex flex-col gap-8" data-selectable>
+      <div>
+        {onClose && (
+          <div className="mb-2 flex items-start justify-between gap-4">
+            <h2 className="min-w-0 break-words text-lg font-medium leading-tight text-primary">
+              {project.name}
+            </h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              aria-label="Close detail"
+              className="-mr-2 -mt-1 shrink-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        <p className="text-sm leading-relaxed text-muted">{project.story}</p>
+      </div>
+
+      <dl className="grid grid-cols-2 gap-4 text-sm">
+        {meta.map((m) => (
+          <div key={m.label}>
+            <dt className="mb-1 text-xs text-muted">{m.label}</dt>
+            <dd className="text-primary">{m.value}</dd>
+          </div>
+        ))}
+        <div>
+          <dt className="mb-1.5 text-xs text-muted">Maturity</dt>
+          <dd>
+            <MaturityBar level={project.maturity} />
+          </dd>
+        </div>
+      </dl>
+
+      {project.tech.length > 0 && (
+        <div>
+          <span className="mb-2 block text-xs text-muted">Stack</span>
+          <div className="flex flex-wrap gap-2">
+            {project.tech.map((t) => (
+              <Badge key={t}>{t}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <span className="mb-2 block text-xs text-muted">Prepojenia</span>
+        <ul className="flex flex-col divide-y divide-border rounded-md border border-border bg-surface">
+          {links.map(({ icon: Icon, label, value }) => (
+            <li key={label} className="flex min-h-[44px] items-center gap-3 px-3 py-2">
+              <Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+              <span className="w-12 shrink-0 text-xs text-muted">{label}</span>
+              <span
+                title={value}
+                className={`min-w-0 truncate text-xs ${value ? 'font-mono text-primary' : 'text-placeholder'}`}
+              >
+                {value ?? 'Nepripojené'}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="h-px w-full bg-border" />
+
+      <div>
+        <h3 className="mb-2 text-sm font-medium text-primary">Business purpose</h3>
+        <p className="text-sm leading-relaxed text-muted">{project.businessPurpose}</p>
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-sm font-medium text-primary">Technical purpose</h3>
+        <p className="text-sm leading-relaxed text-muted">{project.technicalPurpose}</p>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-primary">Risk level</span>
+        <RiskBar level={project.risk} />
+      </div>
+
+      <div>
+        <h3 className="mb-2 text-sm font-medium text-primary">Next step</h3>
+        <p className="text-sm text-muted">{project.nextStep}</p>
+      </div>
+
+      <div className="flex flex-col gap-2 pt-2">
+        {githubUrl ? (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClassName('primary', 'md', 'w-full')}
+          >
+            <Github className="mr-2 h-4 w-4" />
+            Open GitHub
+          </a>
+        ) : (
+          <Button variant="primary" className="w-full" disabled>
+            <Github className="mr-2 h-4 w-4" />
+            Open GitHub
+          </Button>
+        )}
+
+        {vercelUrl && (
+          <a
+            href={vercelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClassName('outline', 'md', 'w-full')}
+          >
+            <Triangle className="mr-2 h-4 w-4" />
+            Open on Vercel
+          </a>
+        )}
+
+        <div className="grid grid-cols-2 gap-2">
+          {caseStudyUrl ? (
+            <a
+              href={caseStudyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonClassName('outline', 'md', 'w-full')}
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Case study
+            </a>
+          ) : (
+            <Button variant="outline" className="w-full" disabled>
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Case study
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            className={`w-full ${onRoadmap ? 'bg-surface-2 text-primary' : ''}`}
+            aria-pressed={onRoadmap}
+            onClick={() => {
+              const next = !onRoadmap;
+              writeJSON(`roadmap:${project.id}`, next);
+              setOnRoadmap(next);
+            }}
+          >
+            {onRoadmap ? <Check className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
+            {onRoadmap ? 'On roadmap' : 'Roadmap'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

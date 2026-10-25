@@ -1,0 +1,123 @@
+/* Fonts are self-hosted via @fontsource (imported in src/index.tsx) — no third-party requests, works offline. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-app: #0f1010;
+    --bg-surface: #1b1c1d;
+    --bg-surface-2: #202123;
+    --bg-surface-3: #2a2b2c;
+    --border-subtle: #333436;
+    --text-primary: #e5e5e5;
+    --text-secondary: #8f8f8f;
+    --text-placeholder: #999b9f;
+    color-scheme: dark;
+  }
+  /* Native app shell: fixed frame, no page scroll, no rubber-band, no sideways drift */
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--bg-app);
+  }
+  body {
+    @apply bg-app font-sans text-primary antialiased;
+    position: fixed;
+    inset: 0;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    outline: 1px solid rgb(255 255 255 / 0.35);
+    outline-offset: 2px;
+  }
+  /* Long-form detail text stays selectable/copyable */
+  [data-selectable],
+  [data-selectable] * {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  input,
+  textarea,
+  [contenteditable='true'] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  img {
+    -webkit-user-drag: none;
+  }
+}
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  /* Vertical-only scroll region without bounce or horizontal pan */
+  .scroll-y {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y pinch-zoom;
+  }
+  /* Contained horizontal scroller (chip rows) that never moves the page */
+  .scroll-x {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pinch-zoom;
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+/* Prevent iOS auto-zoom when focusing inputs */
+@media (max-width: 1023px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes splash-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
