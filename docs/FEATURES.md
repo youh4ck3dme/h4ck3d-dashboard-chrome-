@@ -26,7 +26,7 @@
 - **Vercel:** token (+ voliteľné Team ID) → projekty, produkčná URL, stav deploymentu.
 - **Lokálne:** cez [lokálny skener](LOCAL-SCANNER.md) na `http://localhost:3001`.
 - Spájanie do jednej karty: najprv podľa GitHub repa (`owner/repo`), potom podľa jednoznačného kompatibilného názvu.
-- Importované projekty sa ukladajú do `localStorage` (bez tokenov) a prežijú reload aj offline štart.
+- Importované projekty a Roadmap sa ukladajú do IndexedDB (bez tokenov); prežijú reload aj offline štart. Zdrojové snapshoty majú TTL bez automatického vymazania offline kópie.
 
 ## Úvodná obrazovka (mobil/tablet < 1024 px)
 
@@ -44,3 +44,7 @@
 ## Prístupnosť
 
 Skip link, dialógy s focus trapom a návratom focusu, `aria-pressed` na čipoch, `role="switch"`, live región s počtom výsledkov, `prefers-reduced-motion`.
+
+## Offline-first
+
+Transakčná migrácia legacy dát, optimistic Roadmap s rollbackom pri chybe, koordinácia kariet a refresh fronta s lease/fencing. Lokálny skener podporuje podmienenú background obnovu; GitHub/Vercel obnovu vyžadujú credentials v pamäti. Cross-device sync a push server nie sú implementované. [Detaily a stavová matica](OFFLINE-SYNC.md).

@@ -4,11 +4,12 @@ import { Button } from '../ui/Button';
 import { TextField } from '../ui/TextField';
 import { SourceCard, SourceConnected, SourceError } from './SourceCard';
 import { type LocalProject, fetchLocalProjects } from '../../lib/sources';
+import { localEndpoint } from '../../offline/engine';
 import { useSourceRequest } from '../../hooks/useSourceRequest';
 
 interface LocalConnectorProps {
   count: number;
-  onLoaded: (items: LocalProject[]) => void;
+  onLoaded: (items: LocalProject[], endpoint?: string) => void | Promise<boolean>;
   onDisconnect: () => void;
 }
 
@@ -21,6 +22,13 @@ export function LocalConnector({ count, onLoaded, onDisconnect }: LocalConnector
 
   const scan = async () => {
     if (!url.trim() || loading) return;
+    let endpoint: string;
+    try {
+      endpoint = localEndpoint(url.trim());
+    } catch {
+      setError('Použi loopback adresu skenera bez prihlasovacích údajov.');
+      return;
+    }
     setLoading(true);
     setError(null);
     const signal = request.begin();
@@ -31,7 +39,7 @@ export function LocalConnector({ count, onLoaded, onDisconnect }: LocalConnector
       setError(result.error);
       return;
     }
-    onLoaded(result.items);
+    if ((await onLoaded(result.items, endpoint)) === false) return;
     setConnected(true);
   };
 

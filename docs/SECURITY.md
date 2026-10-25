@@ -8,14 +8,16 @@ Táto aplikácia je osobná statická PWA. Nemá serverové konto, zdieľanú da
 - Odchádzajúce pripojenia sú obmedzené na GitHub API, Vercel API a loopback skener.
 - HSTS, nosniff, DENY, referrer policy, Permissions-Policy a COOP.
 - Externé URL pripúšťajú iba HTTP/HTTPS bez prihlasovacích údajov. Odkazy majú `noopener noreferrer`.
-- API odpovede aj uložené projekty prechádzajú runtime validáciou povinných polí, polí dátumov, kolekcií a odkazov. Poškodené localStorage dáta sa zahodia.
+- API odpovede aj uložené projekty prechádzajú runtime validáciou povinných polí, polí dátumov, kolekcií a odkazov. Poškodené legacy dáta sa nemigrujú ani automaticky nemažú; používateľ dostane upozornenie.
 - Požiadavky majú 15-sekundový timeout na stránku, zrušenie pri odchode a `redirect: error`, `cache: no-store`. Neúplné stránkovanie sa hlási ako chyba, nie ako kompletný import.
 
 ## Tokeny a metadáta
 
-PAT/Vercel token sa odosiela iba na pevný API endpoint danej služby. Ostáva v pamäti komponentu a po výsledku požiadavky, importe alebo zavretí GitHub panela sa vymaže. Nezapisuje sa do cookies, localStorage, repozitára ani logov. Zavretie zdrojového modalu zruší rozpracované importy.
+PAT/Vercel token sa odosiela iba na pevný API endpoint danej služby. Po importe môže zostať v pamäťovom session callbacku pre automatický refresh. Pri odpojení alebo zavretí aplikácie sa zahodí. Nikdy sa nezapisuje do IndexedDB, outboxu, localStorage, cookies, repozitára ani logov. Zavretie modalu zruší rozpracovaný import; už pripojený session refresher zaniká odpojením zdroja.
 
-`h4ck3d:v1:source:*` obsahuje importované názvy, popisy, dátumy, URL a lokálne cesty. Použi Odpojiť na vymazanie príslušného importu. `h4ck3d:roadmap:*` obsahuje iba príznak Roadmap; `h4ck3d:splash:lastActive` v sessionStorage riadi úvodnú animáciu. Dáta sa nesynchronizujú medzi zariadeniami. XSS alebo rozšírenie s prístupom k stránke môže čítať jej pamäť/úložisko; používaj minimálne oprávnenia a krátku platnosť tokenov.
+IndexedDB `h4ck3d-timeline` obsahuje importované metadáta, lokálne Roadmap overrides a sync protokol. Zdrojové localStorage kľúče sa migrujú. Storage signal obsahuje iba náhodné ID, sessionStorage riadi splash. Zdroj sa odpojí zvýšením generácie a odstránením snapshotu/fronty; overrides sa zachovajú. [Offline schéma, export a reset](OFFLINE-SYNC.md).
+
+Lokálna gzip záloha môže obsahovať súkromné názvy a cesty a nie je šifrovaná. Dáta sa nesynchronizujú medzi zariadeniami. XSS alebo rozšírenie s prístupom k stránke môže čítať pamäť aj úložisko; používaj minimálne oprávnenia a krátku platnosť tokenov.
 
 ## Lokálny skener
 

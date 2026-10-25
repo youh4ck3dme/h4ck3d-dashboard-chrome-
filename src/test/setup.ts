@@ -1,13 +1,14 @@
+import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom/vitest';
 import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
 afterEach(() => {
   cleanup();
-  localStorage.clear();
+  if (typeof localStorage !== 'undefined') localStorage.clear();
 });
 
-if (!window.matchMedia) {
+if (typeof window !== 'undefined' && !window.matchMedia) {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: (query: string) => ({
@@ -24,4 +25,5 @@ if (!window.matchMedia) {
 }
 
 // jsdom doesn't implement element scrolling
-if (!Element.prototype.scrollTo) Element.prototype.scrollTo = () => undefined;
+if (typeof Element !== 'undefined' && !Element.prototype.scrollTo)
+  Element.prototype.scrollTo = () => undefined;

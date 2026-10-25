@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Check, ExternalLink, Github, HardDrive, Plus, Triangle, X } from 'lucide-react';
 import type { Project } from '../data/projects';
 import { displayHost, safeExternalUrl } from '../lib/url';
@@ -8,7 +7,7 @@ import { Button } from './ui/Button';
 import { buttonClassName } from './ui/buttonStyles';
 import { MaturityBar } from './ui/MaturityBar';
 import { RiskBar } from './ui/RiskBar';
-import { readJSON, writeJSON } from '../lib/storage';
+import { useOfflineState, roadmapValue, updateRoadmap } from '../offline/store';
 
 interface ProjectDetailProps {
   project: Project;
@@ -16,9 +15,8 @@ interface ProjectDetailProps {
 }
 
 export function ProjectDetail({ project, onClose }: ProjectDetailProps) {
-  const [onRoadmap, setOnRoadmap] = useState(() =>
-    readJSON(`roadmap:${project.id}`, false, (v): v is boolean => typeof v === 'boolean'),
-  );
+  useOfflineState();
+  const onRoadmap = roadmapValue(project);
   const dateStr = formatDate(project.date, 'long');
   const githubUrl = safeExternalUrl(project.githubUrl);
   const vercelUrl = safeExternalUrl(project.vercelUrl);
@@ -183,9 +181,7 @@ export function ProjectDetail({ project, onClose }: ProjectDetailProps) {
             className={`w-full ${onRoadmap ? 'bg-surface-2 text-primary' : ''}`}
             aria-pressed={onRoadmap}
             onClick={() => {
-              const next = !onRoadmap;
-              writeJSON(`roadmap:${project.id}`, next);
-              setOnRoadmap(next);
+              void updateRoadmap(project, !onRoadmap);
             }}
           >
             {onRoadmap ? <Check className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}

@@ -32,6 +32,8 @@ export interface LocalProject {
 }
 
 export interface SourceFetchResult<T> {
+  status?: number;
+  retryAfter?: string;
   items: T[];
   error: string | null;
 }
@@ -168,6 +170,9 @@ export function localToProject(l: LocalProject): Project {
 function mergeTwo(a: Project, b: Project): Project {
   return {
     ...a,
+    identityAliases: Array.from(
+      new Set([...(a.identityAliases ?? []), ...(b.identityAliases ?? []), `id:${a.id}`, `id:${b.id}`]),
+    ),
     sources: Array.from(new Set([...(a.sources ?? []), ...(b.sources ?? [])])),
     tech: Array.from(new Set([...a.tech, ...b.tech])).slice(0, 6),
     githubUrl: a.githubUrl ?? b.githubUrl,
@@ -225,10 +230,19 @@ export async function fetchVercelProjects(
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401 || res.status === 403) {
-        return { items: [], error: 'Neplatný Vercel token alebo chýbajú oprávnenia k tímu.' };
+        return {
+          items: [],
+          error: 'Neplatný Vercel token alebo chýbajú oprávnenia k tímu.',
+          status: res.status,
+        };
       }
       if (!res.ok) {
-        return { items: [], error: `Vercel API chyba: ${res.status} ${res.statusText}` };
+        return {
+          items: [],
+          error: `Vercel API chyba: ${res.status} ${res.statusText}`,
+          status: res.status,
+          retryAfter: res.headers.get('retry-after') ?? undefined,
+        };
       }
 
       const data: unknown = await res.json();
@@ -241,7 +255,7 @@ export async function fetchVercelProjects(
             (data.pagination.next != null &&
               (typeof data.pagination.next !== 'number' || !Number.isFinite(data.pagination.next)))))
       ) {
-        return { items: [], error: 'Vercel API vrátilo neplatné dáta.' };
+        return { items: [], error: 'Vercel API vrátilo neplatné dáta.', status: 422 };
       }
       items.push(...data.projects);
       const next = (data.pagination as { next?: number | null } | undefined)?.next ?? null;

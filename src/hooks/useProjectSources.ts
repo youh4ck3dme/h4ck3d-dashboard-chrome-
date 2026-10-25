@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { type Project, projects as staticProjects } from '../data/projects';
+import { useCallback, useEffect, useMemo } from 'react';
+import { projects as staticProjects } from '../data/projects';
 import type { GitHubRepo } from '../lib/github';
 import {
   type LocalProject,
@@ -9,65 +9,46 @@ import {
   mergeProjects,
   vercelToProject,
 } from '../lib/sources';
-import { readJSON, writeJSON } from '../lib/storage';
-import { isProjectList } from '../lib/validation';
-
-export type ExternalSource = 'GitHub' | 'Vercel' | 'Local';
-
+import { clearOfflineSource, importSnapshot, startOffline, useOfflineState } from '../offline/store';
+import type { Source } from '../offline/db';
+export type ExternalSource = Source;
 export interface SourceCounts {
   GitHub: number;
   Vercel: number;
   Local: number;
 }
-
-const STORAGE_VERSION = 1;
 const STATIC = staticProjects.map((p) => ({ ...p, sources: ['Static' as const] }));
-
-/**
- * Imported projects (never tokens) are persisted locally so the timeline
- * survives a reload or an offline start of the installed PWA.
- */
-function usePersistedList(source: ExternalSource) {
-  const key = `v${STORAGE_VERSION}:source:${source}`;
-  const [list, setList] = useState<Project[]>(() => readJSON(key, [], isProjectList));
-  useEffect(() => writeJSON(key, list), [key, list]);
-  return [list, setList] as const;
-}
-
 export function useProjectSources() {
-  const [github, setGithub] = usePersistedList('GitHub');
-  const [vercel, setVercel] = usePersistedList('Vercel');
-  const [local, setLocal] = usePersistedList('Local');
-
+  const state = useOfflineState();
+  useEffect(() => {
+    void startOffline();
+  }, []);
   const projects = useMemo(
     () =>
-      github.length + vercel.length + local.length > 0 ? mergeProjects([github, vercel, local]) : STATIC,
-    [github, vercel, local],
+      state.snapshots.some((s) => s.projects.length)
+        ? mergeProjects(state.snapshots.map((s) => s.projects))
+        : STATIC,
+    [state.snapshots],
   );
-
-  const importGitHub = useCallback(
-    (repos: GitHubRepo[]) => setGithub(repos.map(githubToProject)),
-    [setGithub],
-  );
-  const importVercel = useCallback(
-    (items: VercelProject[]) => setVercel(items.map(vercelToProject)),
-    [setVercel],
-  );
-  const importLocal = useCallback((items: LocalProject[]) => setLocal(items.map(localToProject)), [setLocal]);
-
-  const clearSource = useCallback(
-    (source: ExternalSource) => {
-      if (source === 'GitHub') setGithub([]);
-      if (source === 'Vercel') setVercel([]);
-      if (source === 'Local') setLocal([]);
-    },
-    [setGithub, setVercel, setLocal],
-  );
-
+  const importGitHub = useCallback((repos: GitHubRepo[]) => {
+    return importSnapshot('GitHub', repos.map(githubToProject));
+  }, []);
+  const importVercel = useCallback((items: VercelProject[]) => {
+    return importSnapshot('Vercel', items.map(vercelToProject));
+  }, []);
+  const importLocal = useCallback((items: LocalProject[], endpoint?: string) => {
+    return importSnapshot('Local', items.map(localToProject), endpoint);
+  }, []);
+  const clearSource = useCallback((source: Source) => {
+    void clearOfflineSource(source);
+  }, []);
   const counts: SourceCounts = useMemo(
-    () => ({ GitHub: github.length, Vercel: vercel.length, Local: local.length }),
-    [github.length, vercel.length, local.length],
+    () => ({
+      GitHub: state.snapshots.find((s) => s.source === 'GitHub')?.projects.length ?? 0,
+      Vercel: state.snapshots.find((s) => s.source === 'Vercel')?.projects.length ?? 0,
+      Local: state.snapshots.find((s) => s.source === 'Local')?.projects.length ?? 0,
+    }),
+    [state.snapshots],
   );
-
   return { projects, counts, importGitHub, importVercel, importLocal, clearSource };
 }

@@ -10,12 +10,14 @@ import {
   inferStatus,
   repoToLanguageTags,
 } from '../lib/github';
+import { registerRefresh, forgetRefresh, SyncFailure, retryAfterMs } from '../offline/engine';
+import { githubToProject } from '../lib/sources';
 import { useDialog } from '../hooks/useDialog';
 
 interface GitHubPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (repos: GitHubRepo[]) => void;
+  onImport: (repos: GitHubRepo[]) => void | Promise<boolean>;
 }
 
 type ViewState = 'input' | 'loading' | 'repos' | 'error';
@@ -51,6 +53,7 @@ function FilterCheckbox({
 }
 
 export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
+  const sessionToken = useRef('');
   const [token, setToken] = useState('');
   const [viewState, setViewState] = useState<ViewState>('input');
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
@@ -70,6 +73,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
   useEffect(() => {
     if (!isOpen) {
       abortRef.current?.abort();
+      sessionToken.current = '';
       setToken('');
       setRepos([]);
       setSelectedIds(new Set());
@@ -100,6 +104,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    sessionToken.current = value;
     setViewState('loading');
     setError('');
     const result = await fetchAllRepos(value, controller.signal);
@@ -116,6 +121,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
   };
 
   const handleDisconnect = () => {
+    forgetRefresh('GitHub');
     abortRef.current?.abort();
     setToken('');
     setRepos([]);
@@ -132,8 +138,16 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
       return next;
     });
 
-  const handleImport = () => {
-    onImport(repos.filter((r) => selectedIds.has(r.id)));
+  const handleImport = async () => {
+    const credential = sessionToken.current;
+    const ids = new Set(selectedIds);
+    registerRefresh('GitHub', async (signal) => {
+      const result = await fetchAllRepos(credential, signal);
+      if (result.error)
+        throw new SyncFailure(result.error, result.status, retryAfterMs(result.retryAfter ?? null));
+      return result.repos.filter((repo) => ids.has(repo.id)).map(githubToProject);
+    });
+    if ((await onImport(repos.filter((r) => selectedIds.has(r.id)))) === false) return;
     setToken(''); // token is no longer needed once repos are imported
     onClose();
   };

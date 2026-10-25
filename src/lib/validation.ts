@@ -94,6 +94,7 @@ export function isProjectList(v: unknown): v is Project[] {
     v.length <= 10_000 &&
     v.every((p) => {
       if (!record(p)) return false;
+      if (p.identityAliases !== undefined && !strings(p.identityAliases)) return false;
       return (
         ['id', 'name', 'story', 'businessPurpose', 'technicalPurpose', 'nextStep'].every((k) => text(p[k])) &&
         CATEGORIES.includes(p.category as Project['category']) &&
