@@ -4,7 +4,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "rewrites": [{ "source": "/((?!assets/|.*\\..*).*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/((?!assets/|.*\\..*).*)", "destination": "/index" }],
   "headers": [
     {
       "source": "/(.*)",
