@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const baseURL = process.env.BASE_URL || 'http://127.0.0.1:4173';
+const origin = new URL(baseURL).origin;
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -7,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL,
     trace: 'retain-on-failure',
     launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
       ? {
@@ -29,14 +32,18 @@ export default defineConfig({
       : []),
   ],
   webServer: [
-    {
-      command: 'npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
-      url: 'http://127.0.0.1:4173',
-      reuseExistingServer: !process.env.CI,
-    },
+    ...(!process.env.BASE_URL
+      ? [
+          {
+            command: 'npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
+            url: baseURL,
+            reuseExistingServer: !process.env.CI,
+          },
+        ]
+      : []),
     {
       command: 'node server/local-scanner.mjs',
-      env: { PORT: '3001', PROJECTS_DIR: './e2e/fixtures', CORS_ORIGINS: 'http://127.0.0.1:4173' },
+      env: { PORT: '3001', PROJECTS_DIR: './e2e/fixtures', CORS_ORIGINS: origin },
       url: 'http://127.0.0.1:3001/health',
       reuseExistingServer: false,
     },

@@ -34,7 +34,7 @@ Browser scenáre: hľadanie/reset/detail/persistencia Roadmap; GitHub import/rel
 
 ## Čo tento výsledok nepotvrdzuje
 
-- **Hosting/deployment:** nebol súčasťou požiadavky. Verejná produkčná URL a Vercel CDN hlavičky/routing sa musia overiť po nasadení.
+- **Hosting/deployment:** následná požiadavka na nasadenie narazila na limit 200 Vercel projektov. Verejná produkčná URL a CDN hlavičky/routing zostávajú neoverené; podrobnosti v [RELEASE-STATUS.md](RELEASE-STATUS.md).
 - **Živé integrácie:** GitHub/Vercel účty, práva tokenov, limity a Vercel CORS treba overiť s reálnym účtom. Do repozitára tokeny nepridávať.
 - **Safari/iOS:** lokálne nebol k dispozícii WebKit ani fyzický iPhone. CI má WebKit projekt; jeho výsledok je vo workflow, emulácia nenahrádza test inštalácie na zariadení.
 - **Multi-user/SaaS:** nejde o autentifikovanú zdieľanú službu. Importy sú iba v danom browser profile a sú viditeľné tomu, kto má prístup k profilu.
