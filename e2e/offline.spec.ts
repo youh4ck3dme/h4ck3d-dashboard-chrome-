@@ -24,7 +24,7 @@ async function seed(page: Page) {
   );
 }
 async function detail(page: Page) {
-  await page.getByRole('button', { name: 'Open offline-fixture', exact: true }).click();
+  await page.getByRole('button', { name: 'Otvoriť offline-fixture', exact: true }).click();
 }
 
 test('legacy migration, offline edit, tab close and reopen preserve Roadmap', async ({ page, context }) => {
@@ -33,7 +33,7 @@ test('legacy migration, offline edit, tab close and reopen preserve Roadmap', as
   await detail(page);
   await page.evaluate(() => navigator.serviceWorker.ready);
   await context.setOffline(true);
-  await page.getByRole('button', { name: 'Roadmap', exact: true }).click();
+  await page.getByRole('button', { name: 'Do plánu', exact: true }).click();
   await expect.poll(async () => (await records(page, 'projectOverrides'))[0]?.roadmap).toBe(true);
   expect(await page.evaluate(() => localStorage.getItem('h4ck3d:v1:source:GitHub'))).toBeNull();
   // Close a tab, retain the browser profile, then reopen the offline installed shell.
@@ -42,7 +42,7 @@ test('legacy migration, offline edit, tab close and reopen preserve Roadmap', as
   const next = await context.newPage();
   await ready(next);
   await detail(next);
-  await expect(next.getByRole('button', { name: 'On roadmap', exact: true })).toBeVisible();
+  await expect(next.getByRole('button', { name: 'V pláne', exact: true })).toBeVisible();
 });
 
 test('two tabs receive durable edits and a stale refresh does not erase Roadmap', async ({
@@ -55,10 +55,10 @@ test('two tabs receive durable edits and a stale refresh does not erase Roadmap'
   await ready(second);
   await detail(page);
   await detail(second);
-  await page.getByRole('button', { name: 'Roadmap', exact: true }).click();
-  await expect(second.getByRole('button', { name: 'On roadmap', exact: true })).toBeVisible();
-  await second.getByRole('button', { name: 'On roadmap', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Roadmap', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Do plánu', exact: true }).click();
+  await expect(second.getByRole('button', { name: 'V pláne', exact: true })).toBeVisible();
+  await second.getByRole('button', { name: 'V pláne', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Do plánu', exact: true })).toBeVisible();
   await expect.poll(async () => (await records(page, 'projectOverrides'))[0]?.roadmap).toBe(false);
 });
 
@@ -82,7 +82,7 @@ test('no Background Sync API still opens stale data and requests credentials wit
   await expect(page.getByText(/Zastarané metadáta/)).toBeVisible();
   await expect(page.getByText('Vyžaduje pripojenie: GitHub')).toBeVisible();
   await page.getByRole('button', { name: 'Obnoviť zdroje', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Open offline-fixture', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Otvoriť offline-fixture', exact: true })).toBeVisible();
   expect(calls).toBe(0);
 });
 
@@ -102,9 +102,9 @@ test('durable write failure rolls back optimistic UI and explicitly reports unsa
       return original.apply(this, args);
     };
   });
-  await page.getByRole('button', { name: 'Roadmap', exact: true }).click();
+  await page.getByRole('button', { name: 'Do plánu', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('nepodarilo uložiť');
-  await expect(page.getByRole('button', { name: 'Roadmap', exact: true })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'Do plánu', exact: true })).toHaveAttribute(
     'aria-pressed',
     'false',
   );
@@ -121,7 +121,7 @@ test('slow scanner refresh is deduplicated and disconnect fences its late respon
   await card.getByLabel(/Adresa lokálneho servera/).fill('http://127.0.0.1:3001');
   await card.getByRole('button', { name: 'Prehľadať projekty', exact: true }).click();
   await expect(card.getByText('1 lokálnych projektov')).toBeVisible();
-  if (isMobile) await page.getByRole('button', { name: 'Timeline', exact: true }).click();
+  if (isMobile) await page.getByRole('button', { name: 'Časová os', exact: true }).click();
   else
     await page
       .getByRole('dialog', { name: 'Zdroje projektov' })
@@ -157,7 +157,7 @@ test('a real service worker consumes a durable local-refresh operation', async (
   await card.getByLabel(/Adresa lokálneho servera/).fill('http://127.0.0.1:3001');
   await card.getByRole('button', { name: 'Prehľadať projekty', exact: true }).click();
   await expect(card.getByText('1 lokálnych projektov')).toBeVisible();
-  if (isMobile) await page.getByRole('button', { name: 'Timeline', exact: true }).click();
+  if (isMobile) await page.getByRole('button', { name: 'Časová os', exact: true }).click();
   else
     await page
       .getByRole('dialog', { name: 'Zdroje projektov' })
@@ -196,7 +196,7 @@ test('a real service worker consumes a durable local-refresh operation', async (
   });
   await expect.poll(async () => (await records(page, 'outbox')).length).toBe(0);
   // This proves actual worker execution via message, not native browser sync scheduling.
-  await expect(page.getByRole('button', { name: 'Open scanner-integration-fixture' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Otvoriť scanner-integration-fixture' })).toBeVisible();
 });
 
 test('offline refresh stays queued and drains when connectivity returns', async ({
@@ -218,7 +218,7 @@ test('offline refresh stays queued and drains when connectivity returns', async 
   await card.getByLabel(/Adresa lokálneho servera/).fill('http://127.0.0.1:3001');
   await card.getByRole('button', { name: 'Prehľadať projekty', exact: true }).click();
   await expect(card.getByText('1 lokálnych projektov')).toBeVisible();
-  if (isMobile) await page.getByRole('button', { name: 'Timeline', exact: true }).click();
+  if (isMobile) await page.getByRole('button', { name: 'Časová os', exact: true }).click();
   else
     await page
       .getByRole('dialog', { name: 'Zdroje projektov' })
@@ -229,5 +229,5 @@ test('offline refresh stays queued and drains when connectivity returns', async 
   await expect.poll(async () => (await records(page, 'outbox')).length).toBe(1);
   await context.setOffline(false);
   await expect.poll(async () => (await records(page, 'outbox')).length, { timeout: 45000 }).toBe(0);
-  await expect(page.getByRole('button', { name: 'Open scanner-integration-fixture' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Otvoriť scanner-integration-fixture' })).toBeVisible();
 });

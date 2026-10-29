@@ -10,13 +10,13 @@ export function TextField({ label, hint, className = '', ...props }: TextFieldPr
     <label className="flex flex-col gap-1.5">
       <span className="text-xs font-medium uppercase tracking-wide text-muted">{label}</span>
       <input
-        className={`h-11 w-full rounded-md border border-border bg-app px-3 text-sm text-primary placeholder:text-placeholder focus:outline-none focus:ring-1 focus:ring-white/30 lg:h-10 ${className}`}
+        className={`h-11 w-full rounded-md border border-border bg-app px-3 text-sm text-primary placeholder:text-placeholder focus:outline-none focus:ring-1 focus:ring-white/30 lg:h-8 ${className}`}
         autoComplete="off"
         spellCheck={false}
         {...props}
       />
 
-      {hint && <span className="text-[11px] text-placeholder">{hint}</span>}
+      {hint && <span className="text-xs text-placeholder">{hint}</span>}
     </label>
   );
 }

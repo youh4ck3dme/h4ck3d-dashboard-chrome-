@@ -1,4 +1,5 @@
 import type { Project, ProjectCategory, ProjectStatus, ProjectVisibility } from '../data/projects';
+import { t } from './i18n';
 
 export const CATEGORIES: readonly ProjectCategory[] = [
   'PWA',
@@ -85,7 +86,7 @@ export interface TimelineGroup {
   projects: Project[];
 }
 
-const monthFormat = new Intl.DateTimeFormat('en-US', { month: 'long' });
+const monthFormat = new Intl.DateTimeFormat('sk-SK', { month: 'long' });
 
 /** Groups already-sorted projects by year+month, preserving order. */
 export function groupProjectsByYearMonth(projects: Project[]): TimelineGroup[] {
@@ -94,7 +95,7 @@ export function groupProjectsByYearMonth(projects: Project[]): TimelineGroup[] {
   for (const p of projects) {
     const d = new Date(p.date);
     const valid = !Number.isNaN(d.getTime());
-    const year = valid ? String(d.getFullYear()) : 'Undated';
+    const year = valid ? String(d.getFullYear()) : t.timeline.undated;
     const month = valid ? monthFormat.format(d) : '';
     const key = `${year}-${valid ? String(d.getMonth() + 1).padStart(2, '0') : '00'}`;
 

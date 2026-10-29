@@ -22,7 +22,7 @@ export function SourceCard({ icon: Icon, title, description, count, children }: 
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-medium text-primary">{title}</h3>
             {count > 0 && (
-              <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[11px] text-muted">
+              <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-xs text-muted">
                 {count} projektov
               </span>
             )}

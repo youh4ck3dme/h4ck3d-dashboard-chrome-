@@ -5,7 +5,6 @@ import { TopBar } from './components/TopBar';
 import { Sidebar } from './components/Sidebar';
 import { MobileFilters } from './components/MobileFilters';
 import { StatsRow } from './components/StatsRow';
-import { FeaturedProjects } from './components/FeaturedProjects';
 import { Timeline } from './components/Timeline';
 import { Inspector } from './components/Inspector';
 import { EmptyState } from './components/EmptyState';
@@ -18,6 +17,7 @@ import { useProjectSources } from './hooks/useProjectSources';
 import { useWelcomeScreen } from './hooks/useWelcomeScreen';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { type FilterState, filterProjects, hasActiveFilters, initialFilterState } from './lib/filter';
+import { projectCount, t } from './lib/i18n';
 
 export function App() {
   const [filters, setFilters] = useState<FilterState>(initialFilterState);
@@ -45,6 +45,7 @@ export function App() {
   );
 
   const filtersActive = hasActiveFilters(filters);
+  const query = filters.search.trim();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
@@ -63,6 +64,7 @@ export function App() {
     setSourcesOpen(false);
     setGithubOpen(true);
   }, []);
+  const focusSearch = useCallback(() => setMobileTab('timeline'), []);
 
   const sourcesView = (
     <SourcesView
@@ -76,7 +78,7 @@ export function App() {
 
   return (
     <>
-      {welcome.show && <WelcomeScreen phase={welcome.phase} />}
+      {welcome.show && <WelcomeScreen phase={welcome.phase} onSkip={welcome.dismiss} />}
       <StorageProblem />
       <div
         ref={appRef}
@@ -84,15 +86,17 @@ export function App() {
       >
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:text-app"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-[44px] focus:items-center focus:rounded-md focus:bg-primary focus:px-3 focus:text-sm focus:text-app"
         >
-          Skip to content
+          {t.skipToContent}
         </a>
         <TopBar
           filters={filters}
           setFilters={setFilters}
           onSourcesClick={() => setSourcesOpen(true)}
           connectedCount={connectedCount}
+          searchEnabled={mobileTab === 'timeline'}
+          onSearchIntent={focusSearch}
         />
 
         <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -107,41 +111,28 @@ export function App() {
 
             <div
               ref={scrollRef}
-              className="scroll-y no-scrollbar min-h-0 flex-1 px-4 py-6 md:px-8 md:py-8 lg:p-12"
+              className="scroll-y no-scrollbar min-h-0 flex-1 px-4 py-4 md:px-8 md:py-8 lg:p-12"
             >
               <div className="mx-auto max-w-4xl">
                 <section className={mobileTab === 'timeline' ? '' : 'hidden lg:block'}>
-                  <header className="mb-8 lg:mb-12">
-                    <h1 className="mb-2 text-2xl font-medium text-primary md:text-3xl">
-                      H4CK3D Project Timeline
-                    </h1>
-                    <p className="max-w-2xl text-sm leading-relaxed text-muted md:text-base">
-                      From prototypes to production-grade PWA, SaaS, AI, Firebase, WordPress and DevOps
-                      systems.
-                    </p>
+                  <header className="mb-4 lg:mb-10">
+                    <h1 className="text-2xl font-medium text-primary">{t.appTitle}</h1>
+                    <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">{t.tagline}</p>
                   </header>
 
-                  <StatsRow projects={projects} />
+                  <StatsRow projects={projects} filters={filters} setFilters={setFilters} />
                   <OfflineStatus />
 
-                  <p className="mb-6 text-xs leading-relaxed text-muted" role="status">
-                    {connectedCount === 0
-                      ? 'Ukážkové údaje — pripoj zdroj pre svoje skutočné projekty. Stavy a popisy ukážok nie sú overené.'
-                      : 'Importované metadáta. Kategória, vyspelosť a riziko sú odhady, nie výsledok auditu projektu.'}
+                  <p className="mb-4 text-xs leading-relaxed text-muted" role="status">
+                    {connectedCount === 0 ? t.data.sample : t.data.imported}
                   </p>
 
-                  {!filtersActive && (
-                    <FeaturedProjects
-                      projects={projects}
-                      selectedId={selectedId}
-                      onSelect={toggleSelect}
-                      limit={6}
-                    />
+                  {filtersActive && (
+                    <p role="status" aria-live="polite" className="mb-4 text-sm text-muted">
+                      {projectCount(filteredProjects.length)}
+                      {query ? ` ${t.results.for(query)}` : ''}
+                    </p>
                   )}
-
-                  <p className="sr-only" aria-live="polite">
-                    {filteredProjects.length} projects shown
-                  </p>
 
                   {filteredProjects.length > 0 ? (
                     <Timeline projects={filteredProjects} selectedId={selectedId} onSelect={toggleSelect} />
@@ -150,13 +141,9 @@ export function App() {
                   )}
                 </section>
 
-                <section className={mobileTab === 'featured' ? 'lg:hidden' : 'hidden'}>
-                  <FeaturedProjects projects={projects} selectedId={selectedId} onSelect={toggleSelect} />
-                </section>
-
                 <section className={mobileTab === 'sources' ? 'lg:hidden' : 'hidden'}>
                   <header className="mb-6">
-                    <h1 className="mb-2 text-2xl font-medium text-primary">Zdroje</h1>
+                    <h1 className="mb-2 text-2xl font-medium text-primary">{t.nav.sources}</h1>
                     <p className="text-sm leading-relaxed text-muted">
                       Prepoj GitHub, Vercel a lokálne projekty do jednej timeline.
                     </p>

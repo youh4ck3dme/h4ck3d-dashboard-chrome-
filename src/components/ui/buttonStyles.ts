@@ -10,9 +10,10 @@ const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-primary text-app hover:opacity-90 border border-transparent',
 };
 
+/* F3: 44 px touch height below lg; desktop controls share one 32/36 px rhythm (F3 rows aligned). */
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'h-7 px-3 text-xs',
-  md: 'h-11 lg:h-9 px-4 text-sm',
+  sm: 'h-11 px-3 text-xs lg:h-8',
+  md: 'h-11 px-4 text-sm lg:h-9',
   icon: 'h-11 w-11 lg:h-8 lg:w-8',
 };
 

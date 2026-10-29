@@ -57,7 +57,7 @@ export function SourcesView({
 
       <div className="flex items-start gap-2 px-1 pt-1">
         <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-placeholder" aria-hidden />
-        <p className="text-[11px] leading-relaxed text-placeholder">
+        <p className="text-xs leading-relaxed text-placeholder">
           Projekty sa spájajú do jednej karty podľa GitHub repozitára (napr. h4ck3d/papi-hair-design-app),
           inak podľa názvu. Tokeny sa ukladajú iba v pamäti tejto relácie.
         </p>

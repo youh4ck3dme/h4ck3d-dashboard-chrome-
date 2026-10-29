@@ -1,5 +1,6 @@
 import { MousePointerClick } from 'lucide-react';
 import type { Project } from '../data/projects';
+import { t } from '../lib/i18n';
 import { ProjectDetail } from './ProjectDetail';
 
 interface InspectorProps {
@@ -14,14 +15,14 @@ export function Inspector({ project, onClose }: InspectorProps) {
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface">
           <MousePointerClick className="h-5 w-5 text-muted" />
         </div>
-        <p className="text-sm text-muted">Select a project to see its story.</p>
+        <p className="text-sm text-muted">{t.inspector.empty}</p>
       </aside>
     );
   }
 
   return (
     <aside
-      aria-label={`${project.name} detail`}
+      aria-label={t.inspector.label(project.name)}
       className="scroll-y no-scrollbar hidden h-full w-80 shrink-0 border-l border-border bg-app p-6 lg:block xl:w-96"
     >
       <ProjectDetail key={project.id} project={project} onClose={onClose} />

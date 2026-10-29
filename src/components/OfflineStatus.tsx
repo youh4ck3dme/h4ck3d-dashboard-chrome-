@@ -8,7 +8,7 @@ export function OfflineStatus() {
     .filter(([, s]) => s === 'reconnect')
     .map(([name]) => name);
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-2 text-xs text-muted">
+    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted">
       <span role="status">
         {state.writesPending
           ? 'Ukladám zmenu…'

@@ -41,29 +41,29 @@ test('search, empty state, reset, project detail and roadmap persist', async ({ 
   page.on('pageerror', (error) => errors.push(error.message));
   await ready(page);
   await expect(page.getByText('Ukážkové údaje', { exact: false })).toBeVisible();
-  if (isMobile) await page.getByRole('button', { name: 'Search', exact: true }).click();
-  const search = page.getByRole('searchbox', { name: isMobile ? 'Search projects' : 'Jump to project' });
+  if (isMobile) await page.getByRole('button', { name: 'Hľadať', exact: true }).click();
+  const search = page.getByRole('searchbox', { name: 'Hľadať projekt' });
   await search.fill('zzzz-nonexistent');
-  await expect(page.getByText('No projects match these filters.')).toBeVisible();
-  await page.getByRole('button', { name: 'Clear all filters' }).click();
-  if (isMobile) await page.getByRole('button', { name: 'Close search' }).click();
+  await expect(page.getByText('Žiadne projekty nezodpovedajú filtrom')).toBeVisible();
+  await page.getByRole('button', { name: 'Zrušiť všetky filtre' }).click();
+  if (isMobile) await page.getByRole('button', { name: 'Zavrieť hľadanie' }).click();
   await page
-    .getByRole('button', { name: /^Open / })
+    .getByRole('button', { name: /^Otvoriť / })
     .first()
     .click();
-  const detail = page.getByRole(isMobile ? 'dialog' : 'complementary', { name: / detail$/ });
+  const detail = page.getByRole(isMobile ? 'dialog' : 'complementary', { name: / – detail$/ });
   await expect(detail).toBeVisible();
-  await detail.getByRole('button', { name: 'Roadmap', exact: true }).click();
-  await expect(detail.getByRole('button', { name: 'On roadmap', exact: true })).toHaveAttribute(
+  await detail.getByRole('button', { name: 'Do plánu', exact: true }).click();
+  await expect(detail.getByRole('button', { name: 'V pláne', exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
   await page.reload();
   await page
-    .getByRole('button', { name: /^Open / })
+    .getByRole('button', { name: /^Otvoriť / })
     .first()
     .click();
-  await expect(page.getByRole('button', { name: 'On roadmap', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'V pláne', exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -71,19 +71,19 @@ test('GitHub import survives reload, clears token and disconnect restores demo',
   await page.route('https://api.github.com/**', (route) => route.fulfill({ json: [demoRepo] }));
   await ready(page);
   await github(page);
-  await page.getByLabel('Personal Access Token', { exact: true }).fill('fake-e2e-token');
+  await page.getByLabel('Osobný prístupový token', { exact: true }).fill('fake-e2e-token');
   await page.getByRole('button', { name: /Pripojiť a načítať repozitáre/ }).click();
   await page.getByText('real-import', { exact: true }).click();
   await page.getByRole('button', { name: /Importovať/ }).click();
   // Return from mobile sources to timeline.
-  const timeline = page.getByRole('button', { name: 'Timeline', exact: true });
+  const timeline = page.getByRole('button', { name: 'Časová os', exact: true });
   if (await timeline.isVisible()) await timeline.click();
-  await expect(page.getByRole('button', { name: 'Open real-import', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Otvoriť real-import', exact: true })).toBeVisible();
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain('fake-e2e-token');
   for (const store of ['sourceSnapshots', 'projectOverrides', 'outbox', 'syncMeta'])
     expect(JSON.stringify(await records(page, store))).not.toContain('fake-e2e-token');
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Open real-import', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Otvoriť real-import', exact: true })).toBeVisible();
   await sources(page);
   await page.getByRole('button', { name: /Odpojiť/ }).click();
   await expect(page.getByRole('button', { name: 'Pripojiť GitHub', exact: true })).toBeVisible();
@@ -97,12 +97,12 @@ test('invalid GitHub response shows an error and closing clears credentials', as
   );
   await ready(page);
   await github(page);
-  await page.getByLabel('Personal Access Token', { exact: true }).fill('fake-invalid');
+  await page.getByLabel('Osobný prístupový token', { exact: true }).fill('fake-invalid');
   await page.getByRole('button', { name: /Pripojiť a načítať repozitáre/ }).click();
   await expect(page.getByRole('alert')).toContainText('Neplatný token');
   await page.getByRole('dialog').getByRole('button', { name: 'Zavrieť', exact: true }).click();
   await github(page);
-  await expect(page.getByLabel('Personal Access Token', { exact: true })).toHaveValue('');
+  await expect(page.getByLabel('Osobný prístupový token', { exact: true })).toHaveValue('');
 });
 
 test('malformed stored projects recover to a usable timeline', async ({ page }) => {
@@ -110,7 +110,7 @@ test('malformed stored projects recover to a usable timeline', async ({ page }) 
     localStorage.setItem('h4ck3d:v1:source:GitHub', '[{"id":"bad","name":"Broken"}]'),
   );
   await ready(page);
-  await expect(page.getByRole('button', { name: /^Open / }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Otvoriť / }).first()).toBeVisible();
   await expect(page.getByRole('alert')).toContainText('poškodené');
 });
 
@@ -175,14 +175,14 @@ test('Vercel import maps a production deployment without persisting its token', 
   await card.getByLabel(/Vercel token/).fill('fake-vercel-token');
   await card.getByRole('button', { name: 'Pripojiť Vercel', exact: true }).click();
   await expect(card.getByText('1 projektov načítaných')).toBeVisible();
-  if (isMobile) await page.getByRole('button', { name: 'Timeline', exact: true }).click();
+  if (isMobile) await page.getByRole('button', { name: 'Časová os', exact: true }).click();
   else
     await page
       .getByRole('dialog', { name: 'Zdroje projektov' })
       .getByRole('button', { name: 'Zavrieť' })
       .click();
-  await page.getByRole('button', { name: 'Open vercel-import' }).click();
-  await expect(page.getByRole('link', { name: 'Open on Vercel' })).toHaveAttribute(
+  await page.getByRole('button', { name: 'Otvoriť vercel-import' }).click();
+  await expect(page.getByRole('link', { name: 'Otvoriť Vercel' })).toHaveAttribute(
     'href',
     'https://example.vercel.app/',
   );
@@ -196,13 +196,13 @@ test('real local scanner → HTTP → UI import → reload', async ({ page, isMo
   await card.getByLabel(/Adresa lokálneho servera/).fill('http://127.0.0.1:3001');
   await card.getByRole('button', { name: 'Prehľadať projekty', exact: true }).click();
   await expect(card.getByText('1 lokálnych projektov')).toBeVisible();
-  if (isMobile) await page.getByRole('button', { name: 'Timeline', exact: true }).click();
+  if (isMobile) await page.getByRole('button', { name: 'Časová os', exact: true }).click();
   else
     await page
       .getByRole('dialog', { name: 'Zdroje projektov' })
       .getByRole('button', { name: 'Zavrieť' })
       .click();
-  await expect(page.getByRole('button', { name: 'Open scanner-integration-fixture' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Otvoriť scanner-integration-fixture' })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Open scanner-integration-fixture' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Otvoriť scanner-integration-fixture' })).toBeVisible();
 });

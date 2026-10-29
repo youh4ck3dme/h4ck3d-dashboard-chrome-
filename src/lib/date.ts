@@ -1,6 +1,6 @@
 const formats = {
-  short: new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }),
-  long: new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }),
+  short: new Intl.DateTimeFormat('sk-SK', { month: 'short', year: 'numeric' }),
+  long: new Intl.DateTimeFormat('sk-SK', { month: 'long', year: 'numeric' }),
 };
 
 export function formatDate(iso: string, style: keyof typeof formats): string {

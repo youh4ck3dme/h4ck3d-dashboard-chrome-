@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FADE_MS, HOLD_MS, SPLASH_SRC, type WelcomePhase } from '../hooks/useWelcomeScreen';
+import { t } from '../lib/i18n';
 
 const NICK = 'H4CK3D';
 const GLYPHS = '01<>/\\#$%&*+=?ABCDEFHKX';
@@ -34,26 +35,36 @@ function useDecodedText(text: string, active: boolean) {
 
 interface WelcomeScreenProps {
   phase: WelcomePhase;
+  /** F8: tap/click (or Escape) reveals the dashboard without waiting. */
+  onSkip: () => void;
 }
 
-export function WelcomeScreen({ phase }: WelcomeScreenProps) {
+export function WelcomeScreen({ phase, onSkip }: WelcomeScreenProps) {
   const [reduced] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
   const decoding = phase !== 'loading' && !reduced;
   const nick = useDecodedText(NICK, decoding);
   const settled = nick === NICK && phase !== 'loading';
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onSkip();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onSkip]);
+
   return (
     <div
       role="status"
       aria-live="polite"
-      aria-label="Načítavam H4CK3D Project Timeline"
+      aria-label={t.splash.loading}
+      onClick={onSkip}
+      onPointerDown={onSkip}
       className="fixed inset-0 z-[70] h-[100dvh] w-full touch-none select-none overflow-hidden overscroll-none bg-app lg:hidden"
       style={{
         opacity: phase === 'fading' ? 0 : 1,
         transition: reduced ? 'none' : `opacity ${FADE_MS}ms ease-out`,
       }}
-      onPointerDown={(e) => e.preventDefault()}
-      onTouchMove={(e) => e.preventDefault()}
     >
       {/* Static background — no parallax, no zoom, no motion. */}
       <img
@@ -67,14 +78,14 @@ export function WelcomeScreen({ phase }: WelcomeScreenProps) {
       <div className="absolute inset-0 bg-black/45" aria-hidden />
 
       <div aria-hidden className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6">
-        <p className="font-mono text-3xl font-medium tracking-wide text-primary">
+        <p className="font-mono text-2xl font-medium tracking-wide text-primary">
           <span
             className="inline-block text-muted transition-[opacity,transform] duration-300 ease-out"
             style={{ opacity: settled ? 1 : 0, transform: settled ? 'none' : 'translateX(-6px)' }}
           >
             --
           </span>
-          <span className="tabular-nums">{nick || ' '.repeat(NICK.length)}</span>
+          <span className="tabular-nums">{nick || ' '.repeat(NICK.length)}</span>
           <span
             className="inline-block text-muted transition-[opacity,transform] duration-300 ease-out"
             style={{ opacity: settled ? 1 : 0, transform: settled ? 'none' : 'translateX(6px)' }}
@@ -88,7 +99,7 @@ export function WelcomeScreen({ phase }: WelcomeScreenProps) {
             style={{ opacity: settled ? undefined : 0 }}
           />
         </p>
-        <p className="text-sm text-muted">Project Timeline</p>
+        <p className="text-sm text-muted">{t.splash.subtitle}</p>
       </div>
 
       <div

@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { Project } from '../data/projects';
 import { ProjectDetail } from './ProjectDetail';
 import { useDialog } from '../hooks/useDialog';
+import { t } from '../lib/i18n';
 
 interface MobileDetailPageProps {
   project: Project | null;
@@ -48,7 +49,7 @@ export function MobileDetailPage({ project, onBack }: MobileDetailPageProps) {
       role="dialog"
       aria-modal="true"
       aria-hidden={!open}
-      aria-label={shown ? `${shown.name} detail` : undefined}
+      aria-label={shown ? t.inspector.label(shown.name) : undefined}
       className={`fixed inset-0 z-40 flex flex-col bg-app transition-[transform,visibility] duration-300 ease-[cubic-bezier(0.2,0,0,1)] lg:hidden ${
         open ? 'visible translate-x-0' : 'invisible translate-x-full'
       }`}

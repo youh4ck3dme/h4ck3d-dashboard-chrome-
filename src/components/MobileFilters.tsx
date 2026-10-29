@@ -7,6 +7,7 @@ import {
   initialFilterState,
   toggleItem,
 } from '../lib/filter';
+import { categoryLabel, t } from '../lib/i18n';
 import { Chip } from './ui/Chip';
 import { Button } from './ui/Button';
 import { FeaturedAndSort, FilterControls } from './FilterControls';
@@ -23,26 +24,26 @@ export function MobileFilters({ filters, setFilters }: MobileFiltersProps) {
 
   return (
     <div className="shrink-0 border-b border-border bg-app lg:hidden">
-      <div className="scroll-x no-scrollbar flex items-center gap-2 px-4 py-2">
+      <div className="scroll-x no-scrollbar flex items-center gap-2 px-4 py-1.5">
         <Button
           variant="outline"
           size="sm"
-          className="h-8 shrink-0 rounded-full"
+          className="shrink-0 rounded-full"
           aria-expanded={isOpen}
           aria-controls={panelId}
           onClick={() => setIsOpen((v) => !v)}
         >
           <SlidersHorizontal className="mr-2 h-3.5 w-3.5" aria-hidden />
-          Filters {activeCount > 0 && `(${activeCount})`}
+          {activeCount > 0 ? `${t.filters.title} (${activeCount})` : t.filters.title}
         </Button>
 
-        {CATEGORIES.map((c) => (
+        {CATEGORIES.map((category) => (
           <Chip
-            key={c}
-            active={filters.categories.includes(c)}
-            onClick={() => setFilters((f) => ({ ...f, categories: toggleItem(f.categories, c) }))}
+            key={category}
+            active={filters.categories.includes(category)}
+            onClick={() => setFilters((f) => ({ ...f, categories: toggleItem(f.categories, category) }))}
           >
-            {c}
+            {categoryLabel[category]}
           </Chip>
         ))}
       </div>
@@ -53,8 +54,8 @@ export function MobileFilters({ filters, setFilters }: MobileFiltersProps) {
           className="no-scrollbar flex max-h-[60vh] flex-col gap-6 overflow-y-auto border-t border-border bg-surface-2 p-4"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-primary">All Filters</h3>
-            <Button variant="ghost" size="icon" aria-label="Close filters" onClick={() => setIsOpen(false)}>
+            <h3 className="text-sm font-medium text-primary">{t.filters.all}</h3>
+            <Button variant="ghost" size="icon" aria-label={t.filters.close} onClick={() => setIsOpen(false)}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -73,7 +74,7 @@ export function MobileFilters({ filters, setFilters }: MobileFiltersProps) {
                   setIsOpen(false);
                 }}
               >
-                Clear all filters
+                {t.filters.clear}
               </Button>
             )}
           </div>

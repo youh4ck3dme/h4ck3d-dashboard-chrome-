@@ -34,7 +34,7 @@ function FilterCheckbox({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted transition-colors hover:text-primary">
+    <label className="flex min-h-[44px] cursor-pointer items-center gap-1.5 text-xs text-muted transition-colors hover:text-primary lg:min-h-0">
       <input
         type="checkbox"
         checked={checked}
@@ -169,7 +169,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
           <div className="flex items-center gap-3">
             <Github className="h-5 w-5 text-primary" aria-hidden />
             <h2 id="github-title" className="text-base font-medium text-primary">
-              GitHub Sync
+              Synchronizácia GitHubu
             </h2>
             {viewState === 'repos' && (
               <span className="rounded-full border border-border bg-surface px-2 py-0.5 text-xs text-muted">
@@ -194,16 +194,16 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
               <div className="flex flex-col gap-2">
                 <h3 className="text-sm font-medium text-primary">Pripoj svoj GitHub účet</h3>
                 <p className="text-xs leading-relaxed text-muted">
-                  Zadaj Personal Access Token (PAT) na načítanie repozitárov. Odporúčame fine-grained token s
-                  prístupom <em>Metadata: read-only</em>; klasický token potrebuje scope{' '}
-                  <code className="rounded bg-surface px-1 py-0.5 font-mono text-[11px]">repo</code> pre
-                  súkromné repozitáre.
+                  Zadaj osobný prístupový token (PAT) na načítanie repozitárov. Odporúčame fine-grained token
+                  s prístupom <em>Metadata: read-only</em>; klasický token potrebuje scope{' '}
+                  <code className="rounded bg-surface px-1 py-0.5 font-mono text-xs">repo</code> pre súkromné
+                  repozitáre.
                 </p>
               </div>
 
               <div className="flex flex-col gap-3">
                 <label htmlFor="gh-token" className="text-xs font-medium uppercase tracking-wide text-muted">
-                  Personal Access Token
+                  Osobný prístupový token
                 </label>
                 <input
                   id="gh-token"
@@ -216,7 +216,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
                   onChange={(e) => setToken(e.target.value)}
                   className="h-10 w-full rounded-md border border-border bg-surface px-3 font-mono text-sm text-primary placeholder:text-placeholder focus:outline-none focus:ring-1 focus:ring-white/30"
                 />
-                <p className="text-[11px] text-placeholder">
+                <p className="text-xs text-placeholder">
                   Vytvor token na{' '}
                   <a
                     href="https://github.com/settings/personal-access-tokens/new"
@@ -275,17 +275,17 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
                   placeholder="Hľadať repozitáre…"
                   value={filterText}
                   onChange={(e) => setFilterText(e.target.value)}
-                  className="h-8 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary placeholder:text-placeholder focus:outline-none focus:ring-1 focus:ring-white/30"
+                  className="h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-primary placeholder:text-placeholder focus:outline-none focus:ring-1 focus:ring-white/30 lg:h-8"
                 />
                 <div className="flex flex-wrap items-center gap-3">
-                  <FilterCheckbox label="Private" checked={showPrivate} onChange={setShowPrivate} />
-                  <FilterCheckbox label="Archived" checked={showArchived} onChange={setShowArchived} />
-                  <FilterCheckbox label="Forks" checked={showForks} onChange={setShowForks} />
+                  <FilterCheckbox label="Súkromné" checked={showPrivate} onChange={setShowPrivate} />
+                  <FilterCheckbox label="Archivované" checked={showArchived} onChange={setShowArchived} />
+                  <FilterCheckbox label="Forky" checked={showForks} onChange={setShowForks} />
                   <div className="ml-auto flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setSelectedIds(new Set(filteredRepos.map((r) => r.id)))}
-                      className="text-[11px] text-muted transition-colors hover:text-primary"
+                      className="inline-flex min-h-[44px] items-center text-xs text-muted transition-colors hover:text-primary lg:min-h-0"
                     >
                       Vybrať všetky
                     </button>
@@ -295,14 +295,14 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
                     <button
                       type="button"
                       onClick={() => setSelectedIds(new Set())}
-                      className="text-[11px] text-muted transition-colors hover:text-primary"
+                      className="inline-flex min-h-[44px] items-center text-xs text-muted transition-colors hover:text-primary lg:min-h-0"
                     >
                       Zrušiť výber
                     </button>
                   </div>
                 </div>
                 <div
-                  className="flex items-center justify-between text-[11px] text-placeholder"
+                  className="flex items-center justify-between text-xs text-placeholder"
                   aria-live="polite"
                 >
                   <span>
@@ -344,12 +344,15 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
                           <span className="mb-1 flex items-center gap-2">
                             <span className="truncate text-sm font-medium text-primary">{repo.name}</span>
                             {repo.private ? (
-                              <Lock className="h-3 w-3 shrink-0 text-placeholder" aria-label="Private" />
+                              <Lock className="h-3 w-3 shrink-0 text-placeholder" aria-label="Súkromné" />
                             ) : (
-                              <Unlock className="h-3 w-3 shrink-0 text-placeholder" aria-label="Public" />
+                              <Unlock className="h-3 w-3 shrink-0 text-placeholder" aria-label="Verejné" />
                             )}
                             {repo.archived && (
-                              <Archive className="h-3 w-3 shrink-0 text-placeholder" aria-label="Archived" />
+                              <Archive
+                                className="h-3 w-3 shrink-0 text-placeholder"
+                                aria-label="Archivované"
+                              />
                             )}
                             {repo.fork && (
                               <GitFork className="h-3 w-3 shrink-0 text-placeholder" aria-label="Fork" />
@@ -369,12 +372,12 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
                               {status}
                             </Badge>
                             {tags.slice(0, 3).map((t) => (
-                              <span key={t} className="text-[10px] text-placeholder">
+                              <span key={t} className="text-xs text-placeholder">
                                 {t}
                               </span>
                             ))}
                             {repo.stargazers_count > 0 && (
-                              <span className="flex items-center gap-0.5 text-[10px] text-placeholder">
+                              <span className="flex items-center gap-0.5 text-xs text-placeholder">
                                 <Star className="h-2.5 w-2.5" aria-hidden /> {repo.stargazers_count}
                               </span>
                             )}
@@ -382,7 +385,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
                         </span>
 
                         <span className="shrink-0 text-right">
-                          <span className="block text-[11px] text-placeholder">
+                          <span className="block text-xs text-placeholder">
                             {dateFormat.format(new Date(repo.pushed_at || repo.created_at))}
                           </span>
                           <span
@@ -419,7 +422,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
                 Odpojiť
               </Button>
               {rateLimit !== null && (
-                <span className="hidden text-[11px] text-placeholder sm:inline">
+                <span className="hidden text-xs text-placeholder sm:inline">
                   API limit: {rateLimit} zostáva
                 </span>
               )}
@@ -432,7 +435,7 @@ export function GitHubPanel({ isOpen, onClose, onImport }: GitHubPanelProps) {
 
         {viewState === 'input' && (
           <div className="shrink-0 border-t border-border p-4">
-            <p className="text-center text-[11px] text-placeholder">
+            <p className="text-center text-xs text-placeholder">
               🔒 Token sa neukladá — zostáva iba v pamäti počas tejto relácie a posiela sa len na
               api.github.com.
             </p>

@@ -1,6 +1,8 @@
-import { Cable, List, Star } from 'lucide-react';
+import { Cable, List } from 'lucide-react';
+import { t } from '../lib/i18n';
 
-export type MobileTab = 'timeline' | 'featured' | 'sources';
+/** F2: no separate "Featured" tab — featured projects are marked in the timeline. */
+export type MobileTab = 'timeline' | 'sources';
 
 interface BottomNavProps {
   active: MobileTab;
@@ -9,18 +11,17 @@ interface BottomNavProps {
 }
 
 const TABS: { id: MobileTab; label: string; icon: typeof List }[] = [
-  { id: 'timeline', label: 'Timeline', icon: List },
-  { id: 'featured', label: 'Featured', icon: Star },
-  { id: 'sources', label: 'Zdroje', icon: Cable },
+  { id: 'timeline', label: t.nav.timeline, icon: List },
+  { id: 'sources', label: t.nav.sources, icon: Cable },
 ];
 
 export function BottomNav({ active, onChange, connectedCount }: BottomNavProps) {
   return (
     <nav
-      aria-label="Hlavná navigácia"
+      aria-label={t.mainNavigation}
       className="pb-safe shrink-0 border-t border-border bg-surface lg:hidden"
     >
-      <div className="grid h-16 grid-cols-3">
+      <div className="grid h-16 grid-cols-2">
         {TABS.map(({ id, label, icon: Icon }) => {
           const isActive = active === id;
           return (
@@ -38,12 +39,12 @@ export function BottomNav({ active, onChange, connectedCount }: BottomNavProps) 
               >
                 <Icon className={`h-5 w-5 ${isActive ? 'text-primary' : 'text-muted'}`} />
                 {id === 'sources' && connectedCount > 0 && (
-                  <span className="absolute right-3 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-app">
+                  <span className="absolute right-3 top-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 font-mono text-[11px] font-medium text-app">
                     {connectedCount}
                   </span>
                 )}
               </span>
-              <span className={`text-[11px] font-medium ${isActive ? 'text-primary' : 'text-muted'}`}>
+              <span className={`text-xs font-medium ${isActive ? 'text-primary' : 'text-muted'}`}>
                 {label}
               </span>
             </button>

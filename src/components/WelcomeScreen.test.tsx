@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import { FADE_MS, HOLD_MS, IMAGE_TIMEOUT_MS } from '../hooks/useWelcomeScreen';
@@ -83,7 +83,34 @@ describe('WelcomeScreen', () => {
     expect(imageCount).toBe(0);
   });
 
-  it('shows on mobile, starts after the 800 ms fallback and removes itself', () => {
+  it('reveals the dashboard in at most 1.2 s (F8)', () => {
+    mockMedia({ '(max-width: 1023px)': true });
+    render(<App />);
+    expect(splash()).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(IMAGE_TIMEOUT_MS));
+    act(() => vi.advanceTimersByTime(HOLD_MS));
+    act(() => vi.advanceTimersByTime(FADE_MS));
+    expect(IMAGE_TIMEOUT_MS + HOLD_MS + FADE_MS).toBeLessThanOrEqual(1200);
+    expect(splash()).toBeNull();
+  });
+
+  it('can be skipped by a tap and by Escape (F8)', () => {
+    mockMedia({ '(max-width: 1023px)': true });
+    const first = render(<App />);
+    fireEvent.pointerDown(splash()!);
+    expect(splash()).toBeNull();
+    first.unmount();
+
+    sessionStorage.clear();
+    render(<App />);
+    expect(splash()).toBeInTheDocument();
+    act(() => {
+      fireEvent.keyDown(window, { key: 'Escape' });
+    });
+    expect(splash()).toBeNull();
+  });
+
+  it('shows on mobile, starts after the fallback and removes itself', () => {
     mockMedia({ '(max-width: 1023px)': true });
     render(<App />);
     expect(splash()).toBeInTheDocument();

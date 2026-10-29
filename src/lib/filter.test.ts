@@ -107,11 +107,11 @@ describe('groupProjectsByYearMonth', () => {
   it('groups and preserves order', () => {
     const groups = groupProjectsByYearMonth(filterProjects(list, initialFilterState));
     expect(groups.map((g) => g.key)).toEqual(['2025-06', '2024-03', '2022-02']);
-    expect(groups[0]).toMatchObject({ year: '2025', month: 'June' });
+    expect(groups[0]).toMatchObject({ year: '2025', month: 'jún' });
   });
 
   it('handles invalid dates', () => {
     const groups = groupProjectsByYearMonth([make({ date: 'nope' })]);
-    expect(groups[0].year).toBe('Undated');
+    expect(groups[0].year).toBe('Bez dátumu');
   });
 });

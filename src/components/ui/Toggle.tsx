@@ -6,7 +6,7 @@ interface ToggleProps {
 
 export function Toggle({ checked, onChange, label }: ToggleProps) {
   return (
-    <label className="group flex cursor-pointer items-center justify-between">
+    <label className="group flex min-h-[44px] cursor-pointer items-center justify-between gap-3 lg:min-h-0">
       <span className="text-xs font-medium text-muted transition-colors group-hover:text-primary">
         {label}
       </span>

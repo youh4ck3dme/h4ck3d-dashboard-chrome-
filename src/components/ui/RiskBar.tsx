@@ -1,4 +1,6 @@
 import type { RiskLevel } from '../../data/projects';
+import { riskLabel } from '../../lib/i18n';
+
 export function RiskBar({ level }: { level: RiskLevel }) {
   const segments = level === 'Low' ? 1 : level === 'Medium' ? 2 : 3;
   return (
@@ -8,7 +10,7 @@ export function RiskBar({ level }: { level: RiskLevel }) {
           <div key={i} className={`h-1.5 w-4 rounded-sm ${i <= segments ? 'bg-primary' : 'bg-surface-3'}`} />
         ))}
       </div>
-      <span className="text-xs text-muted">{level}</span>
+      <span className="text-xs text-muted">{riskLabel[level]}</span>
     </div>
   );
 }
